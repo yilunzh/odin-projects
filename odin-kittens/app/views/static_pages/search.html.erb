@@ -1,0 +1,11 @@
+<h1>Search for keywords</h1>
+
+<%= form_tag("/search", method: "get") do %>
+	<%= label_tag(:keyword, "Search for:") %>
+	<%= text_field_tag(:keyword,  params[:keyword], placeholder: "kittens") %>
+	<%= submit_tag("Search") %>
+<% end %>
+
+<% if @url %>
+	<%= image_tag(@url) %>
+<% end %>

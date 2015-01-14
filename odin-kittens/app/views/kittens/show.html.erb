@@ -1,0 +1,7 @@
+<h1>Show Kitten</h1>
+
+<ul>
+<%= @kitten.inspect %>
+</ul>
+
+<%= link_to "Delete", @kitten, method: :delete, data: { confirm: "You sure?" } %>
