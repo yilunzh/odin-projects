@@ -1,0 +1,8 @@
+--- !ruby/object:Game
+word: malmsey
+wrong_guesses:
+- i
+- t
+- p
+guess: _a__s__
+life: 2

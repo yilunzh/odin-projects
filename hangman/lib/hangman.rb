@@ -1,4 +1,5 @@
 require 'pry'
+require 'yaml'
 
 class Game
 	def initialize
@@ -17,7 +18,7 @@ class Game
 	def guess
 		@guess
 	end
-
+	
 	def life
 		@life
 	end
@@ -42,8 +43,8 @@ class Game
 	end
 
 	def display_state
-		puts "#{self.guess}"
-		puts "You have #{self.life} life left"
+		puts "#{@guess}"
+		puts "You have #{@life} life left"
 		if @wrong_guesses.empty?
 			puts "Wrong guesses: None"
 		else
@@ -53,10 +54,25 @@ class Game
 	end
 
 	def guess_letter
-		letter = gets.chomp.downcase
-		while self.valid_input?(letter) == false
-			letter = gets.chomp.downcase
+		gets.chomp.downcase
+	end
+
+	def make_guess
+		letter = guess_letter
+
+		if letter == "save"
+			save_game
+			return 0
 		end
+
+		while valid_input?(letter) == false
+			letter = guess_letter
+			if letter == "save"
+				save_game
+				return 0
+			end
+			# binding.pry
+		end		
 
 		index = (0...@word.length).find_all {|i| @word[i,1] == letter}
 		if index.empty?
@@ -69,7 +85,9 @@ class Game
 	end
 
 	def valid_input?(input)
-		if input.empty?
+		if input == "save"
+			return true
+		elsif input.empty?
 			puts "Sorry, you must guess a letter. Guess again!"
 			return false
 		elsif input.length > 1
@@ -86,18 +104,43 @@ class Game
 	def win?
 		@guess.include?("_") ? false : true
 	end
+
+	def self.save_game
+		Dir.mkdir('games') unless Dir.exists?('games')
+		filename = 'games/saved.yaml'
+		File.open(filename, 'w') do |file|
+			file.puts YAML.dump(self)
+		end
+	end
+
+	def self.load_game
+		content = File.read("games/saved.yaml")
+		YAML::load(content)
+	end
 end
 
-game = Game.new
+
+puts "Welcome to Hangman!"
+puts "Would you like to start a new game? or load the previously saved one? Enter N for new and L for load"
+
+input = gets.chomp
+
+input == "N" ? game = Game.new : game = Game.load_game
 
 while !game.win?
 	game.display_state
-	game.guess_letter
+	status = game.make_guess
+
+	if status == 0
+		puts "game saved successfully"
+		break
+	end
+
 	if game.win?
 		puts "Congratulation, you won!"
 		break
 	elsif game.life <= 0
-		puts "Sorry, you lost"
+		puts "Sorry, you lost. The word was #{game.word}"
 		break
 	end
 end
